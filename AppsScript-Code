@@ -1,0 +1,100 @@
+function extractAvailableMargin() {
+  // Define the search criteria
+  var emailAddress = "statements@fpmarkets.eu";
+  var subject = "Daily Confirmation";
+  var searchQuery = 'from:' + emailAddress + ' subject:"' + subject + '"';
+  
+  // Get the Gmail threads that match the search criteria
+  var threads = GmailApp.search(searchQuery);
+  var dataSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Table");
+  
+  // Set headers in the Data sheet if they are not already set
+  if (dataSheet.getLastRow() === 0) {
+    dataSheet.appendRow(["Date", "Available Margin", "Profit", "Loss"]);
+  }
+
+  // Get the current year
+  var currentYear = new Date().getFullYear();
+
+  // Array to store new data before inserting
+  var newData = [];
+
+  // Loop through each thread and extract the "Available Margin" and "Total" information
+  threads.forEach(function(thread) {
+    var messages = thread.getMessages();
+    messages.forEach(function(message) {
+      var messageDate = message.getDate();
+      var currentDate = new Date();
+      // var testDate = new Date(2024, 11, 21);
+
+      // Normalize both dates to midnight to compare only the date part
+      var normalizedMessageDate = new Date(messageDate);
+      normalizedMessageDate.setHours(0, 0, 0, 0); // Set messageDate to midnight
+      currentDate.setHours(0, 0, 0, 0); // Set currentDate to midnight
+
+      // Check if the normalized message date is the same as the current date
+      if (normalizedMessageDate.getTime() === currentDate.getTime()) {
+        var body = message.getBody();
+        var availableMargin = extractMarginFromHTML(body);
+        var total = extractTotalFromHTML(body);
+        
+        // Format the date with day name
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        var dayName = days[messageDate.getDay()];
+        var monthName = months[messageDate.getMonth()];
+        var day = messageDate.getDate();
+        var year = messageDate.getFullYear();
+        
+        var formattedDate = dayName + ', ' + monthName + ' ' + day + ', ' + year;
+        
+        // Calculate profit and loss
+        var profit = total > 0 ? total : ""; // Set profit if total is positive
+        var loss = total < 0 ? total : ""; // Set loss if total is negative
+        
+        newData.push({
+          date: messageDate,
+          formattedDate: formattedDate,
+          availableMargin: availableMargin,
+          profit: profit,
+          loss: loss
+        });
+      }
+    });
+  });
+
+  // Sort new data by date in descending order (newest first)
+  newData.sort((a, b) => b.date - a.date);
+
+  // Insert each new entry at row 2, pushing existing data down
+  newData.forEach((row) => {
+    if (dataSheet.getLastRow() > 1) {
+      dataSheet.insertRowAfter(1); // Insert after header row
+    }
+    dataSheet.getRange(2, 1, 1, 4).setValues([[
+      row.formattedDate,
+      row.availableMargin,
+      row.profit,
+      row.loss
+    ]]);
+  });
+}
+
+function extractMarginFromHTML(body) {
+  // Use a regular expression to find the "Available Margin" value in HTML
+  var regex = /Available Margin:\s*<\/td>\s*<td[^>]*>([\d,\.]+)/i; // Replace with the approriate text field
+  var match = body.match(regex);
+  
+  // Return the matched value or "Not Found"
+  return match ? match[1] : "Not Found";
+}
+
+function extractTotalFromHTML(body) {
+  // Use a regular expression to find the "Total:" value in HTML
+  var regex = /Total:\s*<\/td>\s*<td[^>]*>([-\d,\.]+)/i; // Replace with the approriate text field
+  var match = body.match(regex);
+  
+  // Return the matched value or 0 if not found
+  return match ? parseFloat(match[1].replace(/,/g, '')) : 0;
+}
