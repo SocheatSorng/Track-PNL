@@ -1,7 +1,7 @@
 function extractAvailableMargin() {
   // Define the search criteria
-  var emailAddress = "statements@fpmarkets.eu";
-  var subject = "Daily Confirmation";
+  var emailAddress = ""; //email of the sender
+  var subject = ""; //subject (Ex: Confirmation)
   var searchQuery = 'from:' + emailAddress + ' subject:"' + subject + '"';
   
   // Get the Gmail threads that match the search criteria
