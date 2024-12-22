@@ -29,7 +29,7 @@ The `Track-PNL` script is a Google Apps Script designed to extract financial dat
      - `var emailAddress = "";` 
        - Replace with the email address of the sender you want to track.
      - `var subject = "";` 
-       - Replace with the subject line you want to filter by (e.g., "Confirmation").
+       - Replace with the subject line you want to filter by (e.g., "Daily Confirmation").
    - Adjust the regular expressions in the `extractMarginFromHTML` and `extractTotalFromHTML` functions if necessary to match the structure of the email body you are working with.
 
 5. **Save the Script**:
