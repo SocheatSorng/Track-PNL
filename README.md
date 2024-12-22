@@ -2,7 +2,7 @@
 
 ## Description
 
-The `Track-PNL` script is a Google Apps Script designed to extract financial data from Gmail messages and log it into a Google Sheet. Specifically, it retrieves the "Available Margin" and "Total" values from emails that match specified criteria, such as the sender's email address and the subject line. The extracted data is then organized in a Google Sheet for easy tracking and analysis.
+The `Track-PNL` script is a Google Apps Script designed to extract financial data from Gmail messages and log it into a Google Sheet. Specifically, it retrieves the "Available Margin" and "Total" values from emails that match specified criteria, such as the sender's email address and the subject line. **Note:** The text labels for these values may vary in different emails, so users should modify the regular expressions in the `extractMarginFromHTML` and `extractTotalFromHTML` functions to match the specific text labels used in their emails. The extracted data is then organized in a Google Sheet for easy tracking and analysis.
 
 ## Features
 
